@@ -6,6 +6,8 @@ set -x
 #sudo usermod -a -G apache ec2-user
 
 # Set variables 
+TENANTS_ROOT_DIR="/usr/local/openresty/nginx/"
+
 FILE="/tmp/openresty.service"
 
 TENANTS_CONFIG_DIR="/opt/nginx/conf/nginx-tenants.d/"
@@ -18,8 +20,10 @@ SCRIPTS_SRC_DIR="/tmp/scripts/"
 SCRIPTS_DEST_DIR="/opt/kickstart/scripts/"
 SCRIPTS_NGINX_DEST_DIR="/opt/nginx/scripts/"
 
-NGINX_HTML_DIR="/usr/local/openresty/nginx/html/"
-NGINX_LUA_DIR="/usr/local/openresty/nginx/lua/"
+NGINX_SSL_DIR="${TENANTS_ROOT_DIR}ssl/"
+NGINX_HTML_DIR="${TENANTS_ROOT_DIR}html/"
+NGINX_LUA_DIR="${TENANTS_ROOT_DIR}lua/"
+NGINX_CONF_DIR="${TENANTS_ROOT_DIR}conf/"
 
 NGINX_TENANTS_DIR="/usr/share/nginx/html/tenants/"
 ########## Set paths
@@ -77,27 +81,48 @@ gmake && gmake install
 
 export PATH="$PATH:/usr/local/openresty/bin"
 
-cp /tmp/src/ModSecurity-nginx_refactoring/modsecurity.conf-recommended /usr/local/openresty/nginx/conf/modsecurity.conf
-cp /tmp/src/ModSecurity-nginx_refactoring/unicode.mapping /usr/local/openresty/nginx/conf/unicode.mapping
-sed -i "s/SecRuleEngine DetectionOnly/SecRuleEngine On/" /usr/local/openresty/nginx/conf/modsecurity.conf
+mkdir -p ${NGINX_CONF_DIR}
+
+cp /tmp/src/ModSecurity-nginx_refactoring/modsecurity.conf-recommended ${TENANTS_ROOT_DIR}conf/modsecurity.conf
+cp /tmp/src/ModSecurity-nginx_refactoring/unicode.mapping ${TENANTS_ROOT_DIR}conf/unicode.mapping
+sed -i "s/SecRuleEngine DetectionOnly/SecRuleEngine On/" ${TENANTS_ROOT_DIR}conf/modsecurity.conf
 
 #git clone https://github.com/SpiderLabs/owasp-modsecurity-crs.git
 
 cd /tmp/src && tar -xvzf /tmp/src/owasp-modsecurity-crs-3.3-dev.tar.gz
 
-mkdir -p /usr/local/openresty/nginx/conf/owasp-modsecurity-crs/rules/
+mkdir -p ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/rules/
 
-mv /tmp/src/ModSecurity-nginx_refactoring/crs-setup.conf.example /usr/local/openresty/nginx/conf/owasp-modsecurity-crs/crs-setup.conf
-mv /tmp/src/ModSecurity-nginx_refactoring/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example /usr/local/openresty/nginx/conf/owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
-mv /tmp/src/ModSecurity-nginx_refactoring/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example /usr/local/openresty/nginx/conf/owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+########## Copy default nginx core config and default edgeone.co.uk default website ##########
+mkdir -p ${NGINX_SSL_DIR}
+mv -f /tmp/nginx/ssl/* ${NGINX_SSL_DIR}
+mkdir -p ${NGINX_HTML_DIR}
+mv -f /tmp/nginx/html/* ${NGINX_HTML_DIR}
+# mv -f /tmp/nginx/nginx-core.d/ ${TENANTS_ROOT_DIR}conf/nginx-core.d/
+# set internal sites and systems api nginx config dedicated location
+# mv -f /tmp/nginx/nginx-tenants.d/ ${TENANTS_ROOT_DIR}conf/nginx-tenants.d/
+# mv -f /tmp/nginx/nginx-opsapi.d/ ${TENANTS_ROOT_DIR}conf/nginx-opsapi.d/
 
-cat <<EOF >> /usr/local/openresty/nginx/conf/modsec_includes.conf
+# mv -f /tmp/nginx/ssl/ ${TENANTS_ROOT_DIR}conf/nginx-ssl.d/
+mv -f /tmp/nginx/lua/* ${TENANTS_ROOT_DIR}lua/
+mv -f /tmp/nginx/conf/* ${TENANTS_ROOT_DIR}conf/
+
+#mv -f /tmp/nginx.conf ${TENANTS_ROOT_DIR}conf/nginx.conf
+
+# mv -f /tmp/nginx/ssl/ /etc/ssl/
+mv -f /tmp/nginx/html/edgeone-default-tenant/ ${NGINX_HTML_DIR}edgeone-default-tenant/
+
+mv /tmp/src/ModSecurity-nginx_refactoring/crs-setup.conf.example ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/crs-setup.conf
+mv /tmp/src/ModSecurity-nginx_refactoring/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+mv /tmp/src/ModSecurity-nginx_refactoring/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+
+cat <<EOF >> ${TENANTS_ROOT_DIR}conf/modsec_includes.conf
 include modsecurity.conf
 include owasp-modsecurity-crs/crs-setup.conf
 include owasp-modsecurity-crs/rules/*.conf
 EOF
 
-#/usr/local/openresty/nginx/sbin/nginx -V
+#${TENANTS_ROOT_DIR}sbin/nginx -V
 
 ########## Configure nginx openresty unit systemd file ##########
 
@@ -115,27 +140,13 @@ systemctl status openresty.service
 fi
 ########## Configure nginx openresty unit systemd file ##########
 
-########## Copy default nginx core config and default edgeone.co.uk default website ##########
-
-mkdir -p ${NGINX_HTML_DIR}
-mv -f /tmp/nginx/html/* ${NGINX_HTML_DIR}
-mv -f /tmp/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-mv -f /tmp/nginx/nginx-core.d/ /usr/local/openresty/nginx/conf/nginx-core.d/
-# set internal sites and systems api nginx config dedicated location
-mv -f /tmp/nginx/nginx-tenants.d/ /usr/local/openresty/nginx/conf/nginx-tenants.d/
-mv -f /tmp/nginx/nginx-opsapi.d/ /usr/local/openresty/nginx/conf/nginx-opsapi.d/
-
-mv -f /tmp/nginx/nginx-ssl.d/ /usr/local/openresty/nginx/conf/nginx-ssl.d/
-mv -f /tmp/nginx/lua/ /usr/local/openresty/nginx/lua/
-mv -f /tmp/nginx/ssl/ /etc/ssl/
-mv -f /tmp/nginx/html/edgeone-default-tenant/ ${NGINX_HTML_DIR}edgeone-default-tenant/
 
 mkdir -p ${NGINX_TENANTS_DIR}
 chown ec2-user:root -R ${NGINX_TENANTS_DIR}
 chmod 755 -R ${NGINX_TENANTS_DIR}
 
 ########## Copy default nginx tenant OPS API ##########
-mv /tmp/nginx/edgeone-api.d/ /usr/local/openresty/nginx/conf/edgeone-api.d/
+#mv /tmp/nginx/edgeone-api.d/ ${TENANTS_ROOT_DIR}conf/edgeone-api.d/
 
 #  nginx pid file location preset
 mkdir -p ${PID_FILE_DIR}
@@ -153,6 +164,8 @@ mkdir -p ${logFileDir}
 ########## Add nginx/openresty in the path ##########
 export PATH=/usr/local/openresty/bin:$PATH
 echo 'export PATH=/usr/local/openresty/bin:$PATH' >> ~/.bashrc
+#Also add path for sudo commands in root bashrc
+echo 'export PATH=/usr/local/openresty/bin:$PATH' >> /root/.bashrc
 
 ########## Check and display openresty version in console ##########
 openresty -V

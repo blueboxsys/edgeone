@@ -31,11 +31,11 @@ resource "aws_instance" "edgeone-prod" {
         source = "templates/openresty.service"
         destination = "/tmp/openresty.service"
     }
-
-    provisioner "file" {
-        source = "nginx/nginx.conf"
-        destination = "/tmp/nginx.conf"
-    }
+    
+#    provisioner "file" {
+#        source = "nginx/nginx.conf"
+#        destination = "/tmp/nginx.conf"
+#    }
 
     provisioner "file" {
         source = "nginx"

@@ -30,9 +30,9 @@ TasksMax=infinity
 LimitCORE=infinity
 
 ExecStopPost=/bin/rm -f /var/varnish/varnish.pid
-#VarnishPIDFile=/var/varnish/varnish.pid
+    #VarnishPIDFile=/var/varnish/varnish.pid
 ExecStart=/usr/local/sbin/varnishd -P /var/varnish/varnish.pid -j unix,user=ec2-user -a varnish=/var/run/varnish/varnish.sock -a 0.0.0.0:81 -f /opt/varnish/conf/default.vcl -s malloc,1024m
-#-S /opt/varnish/secret   /usr/local/varnish/bin/varnishd/varnishd -a :81 -f /opt/varnish/conf/default.vcl -s file,{{ cdn_cache_location }},{{ ( ( cdn_cache_size_bytes | int ) * 0.9 ) | int }}
+    #-S /opt/varnish/secret   /usr/local/varnish/bin/varnishd/varnishd -a :81 -f /opt/varnish/conf/default.vcl -s file,{{ cdn_cache_location }},{{ ( ( cdn_cache_size_bytes | int ) * 0.9 ) | int }}
 ExecReload=/bin/kill -s QUIT $MAINPID && ExecStart=/usr/local/sbin/varnishd -P /var/varnish/varnish.pid -j unix,user=ec2-user  -a varnish=/var/run/varnish/varnish.sock -a 0.0.0.0:81 -f /opt/varnish/conf/default.vcl -s malloc,1024m
 #ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s QUIT $MAINPID

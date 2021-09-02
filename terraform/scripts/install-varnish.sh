@@ -5,7 +5,7 @@ set -x
 # Set variables
 SCRIPTS_DEST_DIR="/opt/varnish/scripts/"
 CONFIG_DIR="/opt/varnish/conf/"
-TENANTS_CONFIG_DIR="/opt/varnish/conf/varnish-tenants.d/"
+TENANTS_CONFIG_DIR="{CONFIG_DIR}varnish-tenants.d/"
 
 VARNISH_UNIX_SOCKET_DIR_PATH="/var/run/varnish/"
 VARNISH_UNIX_SOCKET_FILE_PATH="/var/run/varnish/varnish.sock"
@@ -79,10 +79,14 @@ systemctl start varnish.service
 systemctl status varnish.service
 fi
 
-appAppBin="/usr/local/varnish/bin/varnishd"
 ########## Add nginx/varnish in the path ##########
-export PATH=${appAppBin}:$PATH
-echo 'export PATH=${appAppBin}:$PATH' >> ~/.bashrc
+export PATH=/usr/local/varnish/bin/:$PATH
+
+echo 'export PATH=/usr/local/bin/:$PATH' >> ~/.bashrc
+echo 'export PATH=/usr/local/sbin/:$PATH' >> ~/.bashrc
+#Also add path for sudo commands in root bashrc
+echo 'export PATH=/usr/local/bin/:$PATH' >> /root/.bashrc
+echo 'export PATH=/usr/local/sbin/:$PATH' >> /root/.bashrc
 
 ########## Check and display varnish version in console ##########
 varnishd -V
@@ -96,4 +100,7 @@ mv -f /tmp/varnish/default.vcl ${CONFIG_DIR}default.vcl
 systemctl restart varnish.service
 
 # set tenants varnish config dedicated location so nginx tenant specific configs can be added via API
-mkdir -p ${CONFIG_DIR}vcl-tenants.d/
+mkdir -p ${TENANTS_CONFIG_DIR}
+chmod +x ${TENANTS_CONFIG_DIR}
+chown ec2-user:root ${TENANTS_CONFIG_DIR}
+chmod 755 -R ${TENANTS_CONFIG_DIR}

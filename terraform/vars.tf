@@ -7,7 +7,7 @@ variable "AWS_REGION" {
 }
 
 variable "AWS_PROFILE" {    
-    default = "edgeone"
+    default = "default"
 }
 
 variable "NGINX_TENANT_CONFIG_DIR" {    
