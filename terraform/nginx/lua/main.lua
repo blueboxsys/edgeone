@@ -226,7 +226,7 @@ end
 
                 red:set_timeout(1000) -- 1 sec
                 --local ok, err = red:connect("unix:/tmp/redis.sock")
-                local ok, err = red:connect("workstation-redis-cluster-001.xg2iur.0001.euw2.cache.amazonaws.com")
+                local ok, err = red:connect("workstation-redis-cluster-001.xg2iur.0001.euw2.cache.amazonaws.com", 6379)
                 
                if not ok then
                     ngx.say("failed to connect: ", err)

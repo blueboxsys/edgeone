@@ -54,6 +54,14 @@ resource "aws_security_group" "ssh-allowed" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
+    ingress {
+        from_port = 443
+        to_port = 443
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+
         //If you do not add this rule, you can not reach the Config API to push tenant configs  
     ingress {
         from_port = 8888

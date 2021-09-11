@@ -20,7 +20,6 @@ SCRIPTS_SRC_DIR="/tmp/scripts/"
 SCRIPTS_DEST_DIR="/opt/kickstart/scripts/"
 SCRIPTS_NGINX_DEST_DIR="/opt/nginx/scripts/"
 
-NGINX_SSL_DIR="${TENANTS_ROOT_DIR}ssl/"
 NGINX_HTML_DIR="${TENANTS_ROOT_DIR}html/"
 NGINX_LUA_DIR="${TENANTS_ROOT_DIR}lua/"
 NGINX_CONF_DIR="${TENANTS_ROOT_DIR}conf/"
@@ -94,22 +93,16 @@ cd /tmp/src && tar -xvzf /tmp/src/owasp-modsecurity-crs-3.3-dev.tar.gz
 mkdir -p ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/rules/
 
 ########## Copy default nginx core config and default edgeone.co.uk default website ##########
-mkdir -p ${NGINX_SSL_DIR}
-mv -f /tmp/nginx/ssl/* ${NGINX_SSL_DIR}
-mkdir -p ${NGINX_HTML_DIR}
-mv -f /tmp/nginx/html/* ${NGINX_HTML_DIR}
 # mv -f /tmp/nginx/nginx-core.d/ ${TENANTS_ROOT_DIR}conf/nginx-core.d/
 # set internal sites and systems api nginx config dedicated location
 # mv -f /tmp/nginx/nginx-tenants.d/ ${TENANTS_ROOT_DIR}conf/nginx-tenants.d/
 # mv -f /tmp/nginx/nginx-opsapi.d/ ${TENANTS_ROOT_DIR}conf/nginx-opsapi.d/
 
-# mv -f /tmp/nginx/ssl/ ${TENANTS_ROOT_DIR}conf/nginx-ssl.d/
 mv -f /tmp/nginx/lua/* ${TENANTS_ROOT_DIR}lua/
 mv -f /tmp/nginx/conf/* ${TENANTS_ROOT_DIR}conf/
 
 #mv -f /tmp/nginx.conf ${TENANTS_ROOT_DIR}conf/nginx.conf
 
-# mv -f /tmp/nginx/ssl/ /etc/ssl/
 mv -f /tmp/nginx/html/edgeone-default-tenant/ ${NGINX_HTML_DIR}edgeone-default-tenant/
 
 mv /tmp/src/ModSecurity-nginx_refactoring/crs-setup.conf.example ${TENANTS_ROOT_DIR}conf/owasp-modsecurity-crs/crs-setup.conf
@@ -121,6 +114,32 @@ include modsecurity.conf
 include owasp-modsecurity-crs/crs-setup.conf
 include owasp-modsecurity-crs/rules/*.conf
 EOF
+
+yum install openresty-resty -y
+
+mkdir -p /home/ec2-user/src/
+
+mv /tmp/src/luarocks-3.7.0.tar.gz /home/ec2-user/src/luarocks-3.7.0.tar.gz
+
+cd /home/ec2-user/src/ && tar -xvzf /home/ec2-user/src/luarocks-3.7.0.tar.gz
+cd luarocks-3.7.0
+./configure --prefix=/usr/local/openresty/luajit \
+    --with-lua=/usr/local/openresty/luajit/ \
+    --lua-suffix=jit \
+    --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1
+make
+make install
+
+cd /home/ec2-user/src/
+/usr/local/openresty/luajit/bin/luarocks install lua-resty-auto-ssl
+mkdir -p /etc/resty-auto-ssl
+chown -R root:ec2-user /etc/resty-auto-ssl/
+chmod -R 775 /etc/resty-auto-ssl
+
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+  -subj '/CN=sni-support-required-for-valid-ssl' \
+  -keyout /etc/ssl/resty-auto-ssl-fallback.key \
+  -out /etc/ssl/resty-auto-ssl-fallback.crt
 
 #${TENANTS_ROOT_DIR}sbin/nginx -V
 
