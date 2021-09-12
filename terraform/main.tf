@@ -4,7 +4,7 @@ resource "aws_instance" "edgeone-prod" {
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
     instance_type = "t2.medium"
     # VPC
-    subnet_id = "${aws_subnet.prod-subnet-public-edge.id}"
+    subnet_id = "${aws_subnet.prod-e.id}"
     # Security Group
     vpc_security_group_ids = ["${aws_security_group.ssh-allowed.id}"]
     # the Public SSH key

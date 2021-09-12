@@ -25,8 +25,8 @@ chmod +x ${SCRIPTS_DEST_DIR}*.sh
 
 ########## BASE INSTALL MOVES ALL SCRIPTS TO DEDICATED DIR ##########
 
-#Install services manager go app
-/bin/bash /opt/scripts/install-services-manager.sh
+#Install redis
+/bin/bash /opt/scripts/install-redis.sh
 
 #Install nginx / openresty
 /bin/bash /opt/scripts/install-nginx.sh
@@ -42,3 +42,6 @@ chmod +x ${SCRIPTS_DEST_DIR}*.sh
 
 #Install MariaDB
 #/bin/bash /opt/scripts/install-mariadb.sh
+
+#Install services manager go app
+/bin/bash /opt/scripts/install-services-manager.sh
