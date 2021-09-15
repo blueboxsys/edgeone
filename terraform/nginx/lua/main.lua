@@ -17,8 +17,7 @@ if req_headers["x-headers-debug"] == "on" then
 else 
    -- default value if not header found
 end 
-
-
+local host_is_valid = false
 -- functions
 
 function os.capture(cmd, raw) -- this function cannot be local
@@ -280,7 +279,7 @@ end
 					--yepeee host is found in redis OK
 				ngx.var.is_a_valid_host = true
 				--ngx.say("host: " , res)
-
+host_is_valid = true
 				local cfg_main_table = cjson.decode(res) --convert config json to array/table
 				--handle request as per the config in redis for this host
 				
@@ -380,6 +379,11 @@ if not ok then
                      return
                  end
 -- -- -- -- -- 
-
+if not host_is_valid then
+ngx.header.content_type = "text/html"
+ngx.status = 403
+ngx.say("Forbidden host is not found")
+return ngx.exit(403)
+end
 --ngx.header["X-Proxy-Host"] = ngx.var.proxy_host
 

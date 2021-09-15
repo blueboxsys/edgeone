@@ -1,8 +1,10 @@
 // Define EC2 instance to be built
 resource "aws_instance" "edgeone-prod" {
+    count         = var.instance_count
 
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
-    instance_type = "t2.medium"
+    instance_type = "t3a.small"
+    #instance_type = "t2.medium"
     # VPC
     subnet_id = "${aws_subnet.prod-e.id}"
     # Security Group

@@ -10,6 +10,10 @@ variable "AWS_PROFILE" {
     default = "default"
 }
 
+variable "instance_count" {
+  default = "2"
+}
+
 variable "NGINX_TENANT_CONFIG_DIR" {    
     default = "/opt/nginx/conf/nginx-tenants.d/"
 }

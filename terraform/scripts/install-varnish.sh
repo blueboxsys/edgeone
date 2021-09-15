@@ -7,8 +7,8 @@ SCRIPTS_DEST_DIR="/opt/varnish/scripts/"
 CONFIG_DIR="/opt/varnish/conf/"
 TENANTS_CONFIG_DIR="{CONFIG_DIR}varnish-tenants.d/"
 
-VARNISH_UNIX_SOCKET_DIR_PATH="/var/run/varnish/"
-VARNISH_UNIX_SOCKET_FILE_PATH="/var/run/varnish/varnish.sock"
+VARNISH_UNIX_SOCKET_PATH="/var/run/varnish/"
+VARNISH_UNIX_SOCKET="/var/run/varnish/varnish.sock"
 
 ########## Install varnish varnish-6.6.1 ##########
 echo "Installing Varnish-6.6.1..."
@@ -59,10 +59,10 @@ chown root:root ${pidFileDir}
 pidFile="${pidFileDir}varnish.pid"
 touch ${pidFile}
 
-mkdir -p ${VARNISH_UNIX_SOCKET_DIR_PATH}
-chmod +x ${VARNISH_UNIX_SOCKET_DIR_PATH}
-chown ec2-user:root ${VARNISH_UNIX_SOCKET_DIR_PATH}
-chmod 755 -R ${VARNISH_UNIX_SOCKET_DIR_PATH}
+mkdir -p ${VARNISH_UNIX_SOCKET_PATH}
+chmod +x ${VARNISH_UNIX_SOCKET_PATH}
+chown ec2-user:root ${VARNISH_UNIX_SOCKET_PATH}
+chmod 755 -R ${VARNISH_UNIX_SOCKET_PATH}
 
 ########## Configure varnishd unit systemd file ##########
 FILE=/tmp/varnish.service

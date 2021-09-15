@@ -14,6 +14,13 @@ TENANTS_CONFIG_DIR="/opt/nginx/conf/nginx-tenants.d/"
 
 PID_FILE_DIR="/var/nginx/"
 NGINX_BINARY="/usr/local/openresty/bin"
+NGINX_UNIX_SOCKET_PATH="/var/run/nginx/"
+NGINX_UNIX_SOCKET="/var/run/nginx/nginx.sock"
+
+mkdir -p ${NGINX_UNIX_SOCKET_PATH}
+chmod +x ${NGINX_UNIX_SOCKET_PATH}
+chown ec2-user:root ${NGINX_UNIX_SOCKET_PATH}
+chmod 755 -R ${NGINX_UNIX_SOCKET_PATH}
 
 SCRIPTS_SRC_DIR="/tmp/scripts/"
 
