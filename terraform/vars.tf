@@ -1,5 +1,5 @@
 variable "EDGEONE_NAME" {    
-    default = "workstation-edge-one"
+    default = "edge-one"
 }
 
 variable "AWS_REGION" {    
@@ -11,7 +11,7 @@ variable "AWS_PROFILE" {
 }
 
 variable "instance_count" {
-  default = "2"
+  default = "1"
 }
 
 variable "NGINX_TENANT_CONFIG_DIR" {    

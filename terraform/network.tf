@@ -47,6 +47,34 @@ resource "aws_security_group" "ssh-allowed" {
         cidr_blocks = ["0.0.0.0/0"]
     }
     
+    ingress {
+        from_port = 6379
+        to_port = 6379
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+        ingress {
+        from_port = 8101
+        to_port = 8101
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+        ingress {
+        from_port = 8102
+        to_port = 8102
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+        ingress {
+        from_port = 22221
+        to_port = 22221
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
     tags = {
         HTTP = "Allowed",
         SSH = "Allowed"

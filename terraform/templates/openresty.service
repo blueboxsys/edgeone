@@ -19,6 +19,7 @@ After=network.target
 [Service]
 LimitCORE=infinity
 LimitNOFILE=200000
+Environment="EDGEONE_GTG_TOKEN=thisisunsafe" 
 
 Type=forking
 #PIDFile=/var/nginx/nginx.pid

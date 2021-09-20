@@ -1,5 +1,5 @@
 #!/bin/bash
-
+  
 set -x
 
 workDir=/Users/balinderwalia/Documents/Work/edgeone/terraform
@@ -35,3 +35,5 @@ terraform init
 #terraform plan
 
 terraform apply --auto-approve
+
+/bin/bash update-dynomite.sh

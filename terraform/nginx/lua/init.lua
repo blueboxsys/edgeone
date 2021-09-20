@@ -1,8 +1,14 @@
-local redis = require "resty.redis"
 
-   auto_ssl = (require "resty.auto-ssl").new()
+gtgToken = os.getenv("EDGEONE_GTG_TOKEN")
+hostName = os.getenv("HOSTNAME")
+
+auto_ssl = (require "resty.auto-ssl").new()
 
    auto_ssl:set("allow_domain", function(domain)
+
+    local redis = require "resty.redis"
+local host_header		= ngx.var.host
+
 local ssl_certificate_domain_is_valid = false
 --
 local function ip_addr_get_type(ip)
@@ -46,12 +52,46 @@ if not domain == '' then
 ssl_certificate_domain_is_valid = true
 end
 
+local red = redis:new()
+
+red:set_timeout(1000) -- 1 sec
+--local ok, err = red:connect("unix:/tmp/redis.sock")
+local ok, err = red:connect("127.0.0.1", 6379)
+
+if not ok then
+  ssl_certificate_domain_is_valid = false
+    ngx.say("failed to connect: ", err)
+    return ssl_certificate_domain_is_valid
+end
+
+
+local res, err = red:get(host_header..':host')
+
+if not res then
+  ssl_certificate_domain_is_valid = false
+  ngx.say(host_header..' host_not_found: ', err)
+    return ssl_certificate_domain_is_valid
+
+end
+
+if res == ngx.null then
+  ssl_certificate_domain_is_valid = false
+ngx.say(host_header..' host_not_found: ', err)
+    return ssl_certificate_domain_is_valid
+else
+--yepeee host is found in redis OK
+ssl_certificate_domain_is_valid = true
+end
+
+
+
+
    return ssl_certificate_domain_is_valid
   end)
 
     auto_ssl:set("storage_adapter", "resty.auto-ssl.storage_adapters.redis")
     auto_ssl:set("redis", {
-    host = "workstation-redis-cluster-001.xg2iur.0001.euw2.cache.amazonaws.com"
+    host = "127.0.0.1"
 --socket = "/tmp/redis.sock"
     })
 

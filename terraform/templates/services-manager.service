@@ -4,6 +4,8 @@ ConditionPathExists=/home/ec2-user/services
 After=network.target
 
 [Service]
+Environment="REDIS_HOST=redis.edgeone.cloud:6379" 
+
 Type=simple
 
 Restart=on-failure

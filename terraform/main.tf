@@ -3,10 +3,11 @@ resource "aws_instance" "edgeone-prod" {
     count         = var.instance_count
 
     ami = "${lookup(var.AMI, var.AWS_REGION)}"
-    instance_type = "t3a.small"
+    instance_type = "t3a.medium"
     #instance_type = "t2.medium"
     # VPC
-    subnet_id = "${aws_subnet.prod-e.id}"
+    iam_instance_profile = "${aws_iam_instance_profile.edgeone-ec2-profile.name}"
+    subnet_id = "${aws_subnet.edgeone-subnet.id}"
     # Security Group
     vpc_security_group_ids = ["${aws_security_group.ssh-allowed.id}"]
     # the Public SSH key
@@ -22,6 +23,11 @@ resource "aws_instance" "edgeone-prod" {
     provisioner "file" {
         source = "scripts"
         destination = "/tmp/scripts"
+    }
+
+    provisioner "file" {
+        source = "templates/dynomite.yml"
+        destination = "/tmp/dynomite.yml"
     }
 
     provisioner "file" {
@@ -99,7 +105,7 @@ resource "aws_instance" "edgeone-prod" {
     }
 
     provisioner "local-exec" {
-        command = "echo ${self.public_ip} >> public_ips.txt"
+        command = "echo ${self.public_ip} > public_ips.txt"
     }
 
 

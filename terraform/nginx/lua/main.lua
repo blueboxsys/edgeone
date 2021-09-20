@@ -225,7 +225,7 @@ end
 
                 red:set_timeout(1000) -- 1 sec
                 --local ok, err = red:connect("unix:/tmp/redis.sock")
-                local ok, err = red:connect("workstation-redis-cluster-001.xg2iur.0001.euw2.cache.amazonaws.com", 6379)
+                local ok, err = red:connect("127.0.0.1", 6379)
                 
                if not ok then
                     ngx.say("failed to connect: ", err)
@@ -279,24 +279,35 @@ end
 					--yepeee host is found in redis OK
 				ngx.var.is_a_valid_host = true
 				--ngx.say("host: " , res)
-host_is_valid = true
+        host_is_valid = true
 				local cfg_main_table = cjson.decode(res) --convert config json to array/table
 				--handle request as per the config in redis for this host
 				
 				-- -- -- -- --
 				
-		  	  local backend_proxy_output		= ''
-		  	  local backend_priority_output 	= 0
-	  
-		  	  --Fetch default proxy for all request types
-		  	  local backend_proxy = 'proxy_pass'
-	  
-		  	  for kk,vv in pairs(cfg_main_table) do
-		  	    if kk == backend_proxy then
-		  	      backend_proxy_output = vv	--ngx.say("proxy_pass: "..vv..'<br>')
-				  ngx.var.proxy_host = backend_proxy_output
-		  	    end
-		  	  end
+        local backend_proxy_output		= ''
+        local backend_priority_output 	= 0
+        local backend_proxy_port 	= '80'
+        local backend_proxy_port_output = ''
+        --Fetch default proxy for all request types
+        local backend_proxy = 'proxy_pass'
+        local backend_port= 'proxy_port'
+  
+        for kk,vv in pairs(cfg_main_table) do
+          if kk == backend_proxy then
+            backend_proxy_output = vv	--ngx.say("proxy_pass: "..vv..'<br>')
+        ngx.var.proxy_host = backend_proxy_output
+          end
+
+          if kk == backend_port then
+            backend_proxy_port_output = vv	--ngx.say("proxy_pass: "..vv..'<br>')
+            backend_proxy_port = backend_proxy_port_output
+            if backend_proxy_port_output == "" then
+            else
+            ngx.var.proxy_port = backend_proxy_port_output
+          end
+        end
+        end
 
 		  	 --for loop go through config json as array/table
 		  	  for cfg_key,cfg_val in pairs(cfg_main_table) do
@@ -346,8 +357,9 @@ host_is_valid = true
 		  	  end
         
           if ngx.var.send_debug_headers then
-                    ngx.header["X-Backend-Proxy-Output"] = backend_proxy_output
-                    --ngx.header["X-Backend-Priority-Output"] = backend_priority_output
+            ngx.header["X-Backend-Proxy-Output"] = backend_proxy_output
+            ngx.header["X-Backend-Proxy-port"] = backend_proxy_port_output
+            --ngx.header["X-Backend-Priority-Output"] = backend_priority_output
                     --ngx.header["X-Backend-Host"] = ngx.var.proxy_host
                     --ngx.var.proxy_port = GetHostPortNumber(ngx.var.proxy_host)
                     --ngx.header["X-Backend-Port"] = ngx.var.proxy_port
